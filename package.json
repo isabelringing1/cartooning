@@ -1,0 +1,11 @@
+{
+  "name": "cartooning",
+  "version": "1.0.0",
+  "description": "CPSC 678 Final Project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Isabel Lee",
+  "license": "ISC"
+}
