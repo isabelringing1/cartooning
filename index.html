@@ -1,0 +1,22 @@
+<html>
+  <head>
+    <!-- Load TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.2"></script>
+    <!-- Load BodyPix -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.0"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="main.js"></script>
+    <script src="whammy.js"></script>
+ </head>
+    <body> 
+        <input type="file" id="uploadVideoFile" accept="video/*" />
+        <button id="process"> Process </button>
+        <div id="videoSourceWrapper">
+            <video style="width: 20%;" id="video" controls>
+                <source id="videoSource"/>
+            </video>
+            <div id="uploadVideoProgressBar" style="height: 5px; width: 1%; background: #2781e9; margin-top: -5px;"></div>   
+        </div>
+    </body>
+ </html>
+ 
