@@ -1,6 +1,5 @@
 const express = require('express');
 var path = require("path");
-
 const app = express();
 
 process.env.WEBGL_CPU_FORWARD = 'false';

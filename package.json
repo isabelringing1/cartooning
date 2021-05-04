@@ -12,5 +12,6 @@
     "url": "https://github.com/isabelringing1/cartooning.git"
   },
   "author": "Isabel Lee",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {}
 }

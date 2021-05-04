@@ -7,15 +7,50 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="main.js"></script>
     <script src="whammy.js"></script>
+    <script src="warp.js"></script>
+    <link rel="stylesheet" typ="text/css" href="style.css">
  </head>
     <body> 
-        <input type="file" id="uploadVideoFile" accept="video/*" />
-        <button id="process"> Process </button>
-        <div id="videoSourceWrapper">
-            <video style="width: 20%;" id="video" controls>
-                <source id="videoSource"/>
-            </video>
-            <div id="uploadVideoProgressBar" style="height: 5px; width: 1%; background: #2781e9; margin-top: -5px;"></div>   
+
+        <div id ="buttons">
+            <input type="file" id="uploadVideoFile" accept="video/*" />
+            <button id="process"> Process </button>
+            <div class="dropdown_div">
+                <select id="dropdown1">
+                    <option value="bodySeg">Body Segmentation Mask</option>
+                    <option value="fullChar">Full Character Mask</option>
+                </select>
+
+                <select id="dropdown">
+                    <option value="none">No face detail</option>
+                    <option value="eyeMouth">👁 👄 👁</option>
+                    <option value="winky">😜</option>
+                    <option value="heart">😍</option>
+                    <option value="ironman">Iron Man</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="original">
+            <div id="videoSourceWrapper">
+                <video id="video" controls>
+                    <source id="videoSource"/>
+                </video>
+                <div id="uploadVideoProgressBar" style="height: 5px; width: 1%; background: #2781e9; margin-top: -5px;"></div>   
+            </div>
+        </div>
+
+        <div id="secret" style="display:none">
+            <img src="img/l_eye.png" id="l_eye">
+            <img src="img/r_eye.png" id="r_eye">
+            <img src="img/mouth.png" id="mouth">
+            <img src="img/winky.png" id="winky">
+            <img src="img/heart.png" id="heart">
+            <img src="img/ironman.png" id="ironman">
+        </div>
+
+        <div id="secret2">
+            <img src="img/gingy.svg" id="gingy" style="width:300px">
         </div>
     </body>
  </html>
