@@ -1,26 +1,31 @@
 <html>
   <head>
+    <title>Cartooning</title>
     <!-- Load TensorFlow.js -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.2"></script>
     <!-- Load BodyPix -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.0"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link href='https://fonts.googleapis.com/css?family=Actor' rel='stylesheet'>
+    <script src="glfx.js"></script>
     <script src="main.js"></script>
     <script src="whammy.js"></script>
-    <script src="warp.js"></script>
+    
     <link rel="stylesheet" typ="text/css" href="style.css">
  </head>
     <body> 
-
+        <div id="header">
+            CARTOONING
+        </div>
         <div id ="buttons">
             <input type="file" id="uploadVideoFile" accept="video/*" />
-            <button id="process"> Process </button>
-            <div class="dropdown_div">
+            <br>
+            <div id="dropdown_div">
                 <select id="dropdown1">
                     <option value="bodySeg">Body Segmentation Mask</option>
                     <option value="fullChar">Full Character Mask</option>
                 </select>
-
+                <br>
                 <select id="dropdown">
                     <option value="none">No face detail</option>
                     <option value="eyeMouth">👁 👄 👁</option>
@@ -29,8 +34,10 @@
                     <option value="ironman">Iron Man</option>
                 </select>
             </div>
+            <br>
+            <button id="process"> Process </button>
         </div>
-
+        <div id="progress_bar"> </div>
         <div id="original">
             <div id="videoSourceWrapper">
                 <video id="video" controls>
@@ -38,6 +45,12 @@
                 </video>
                 <div id="uploadVideoProgressBar" style="height: 5px; width: 1%; background: #2781e9; margin-top: -5px;"></div>   
             </div>
+        </div>
+        <br>
+
+        <div id="results">Results: 
+            <div id="results_video"></div>
+            <button id="download_button"> Download </button>
         </div>
 
         <div id="secret" style="display:none">
@@ -49,9 +62,12 @@
             <img src="img/ironman.png" id="ironman">
         </div>
 
-        <div id="secret2">
+        <div id="secret2" style="display:none">
             <img src="img/gingy.svg" id="gingy" style="width:300px">
         </div>
+        <canvas id="gingy_canvas">
+
+        </canvas>
     </body>
  </html>
  

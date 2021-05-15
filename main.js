@@ -1,10 +1,13 @@
 var then = 0;
 var now = 0;
 var elapsed = 0;
+var numFrames = 0;
+var opacity = 1;
 var times = [];
 var net;
 var img_array = [];
 var color_inputs = [];
+var rainbow = false;
 var colors = [
     [110, 64, 170], [110, 64, 170], [178, 60, 178], [178, 60, 178],
     [238, 67, 149], [238, 67, 149], [255, 94, 99],  [255, 94, 99],
@@ -33,20 +36,20 @@ const outfit1 = [
   ];
 
 const parts = [
-    ["Face", [0, 1]],
-    ["Left upper arm", [2, 3]],
-    ["Right upper arm", [4, 5]],
-    ["Left lower arm", [6, 7]],
-    ["Right lower arm", [8, 9]],
-    ["Left hand", [10]],
-    ["Right hand", [11]],
-    ["Torso", [12, 13]],
-    ["Left upper leg", [14, 15]],
-    ["Right upper leg", [16, 17]],
-    ["Left lower leg", [18, 19]],
-    ["Right lower leg", [20, 21]],
-    ["Left foot", [22]],
-    ["Right foot", [23]]
+    ["  Face", [0, 1]],
+    ["  Left upper arm", [2, 3]],
+    ["  Right upper arm", [4, 5]],
+    ["  Left lower arm", [6, 7]],
+    ["  Right lower arm", [8, 9]],
+    ["  Left hand", [10]],
+    ["  Right hand", [11]],
+    ["  Torso", [12, 13]],
+    ["  Left upper leg", [14, 15]],
+    ["  Right upper leg", [16, 17]],
+    ["  Left lower leg", [18, 19]],
+    ["  Right lower leg", [20, 21]],
+    ["  Left foot", [22]],
+    ["  Right foot", [23]]
 ];
 
 const gingy_coords = [
@@ -75,12 +78,12 @@ async function setup(){
 };
 
 async function labelImages(array){ //make this a for loop, after all images loaded
-    const opacity = 0.9;
     const flipHorizontal = false;
     const maskBlurAmount = 0;
     const frames = [];
     var encoder = new Whammy.Video(60);
     var mode = document.getElementById("dropdown1").value;
+    var choice = document.getElementById("dropdown").value;
     for (var i = 0; i < array.length; i++){
         const segmentation = await net.segmentPersonParts(array[i], {
             flipHorizontal: false,
@@ -94,6 +97,10 @@ async function labelImages(array){ //make this a for loop, after all images load
             }
         }
         //console.log(poses)
+        if (rainbow){
+            var first = colors.shift()
+            colors.push(first);
+        }
         var coloredPartImage = bodyPix.toColoredPartMask(segmentation, colors);
         // make backgrorund transparent
         coloredPartImage.data = makeTransparent(coloredPartImage.data);
@@ -107,12 +114,16 @@ async function labelImages(array){ //make this a for loop, after all images load
             addCharacter(canvas, poses);
         }
         //add face details to image
-        addFaceDetails(canvas, poses);
+        if (choice != 'none'){
+            addFaceDetails(canvas, poses);
+        }
+        incrementProgress(i);
         console.log("Processing frame " + i);
         encoder.duration = times[i+1]; //fixes my fps problem
         encoder.add(canvas);
     }
     var url;
+    var progress = document.getElementById('progress_bar');
     encoder.compile(false, function(output){
         url = (window.webkitURL || window.URL).createObjectURL(output);
         console.log(url);
@@ -120,20 +131,39 @@ async function labelImages(array){ //make this a for loop, after all images load
     });
 }
 
+function incrementProgress(curr){
+    var progress = document.getElementById('progress_bar');
+    var unit = 100 / numFrames; 
+    progress.style.width = unit * curr + "%";
+    //progress.style.margin-right = (90 - unit * curr) + "%";
+}
+
 function addCharacter(canvas, poses){
     var ctx = canvas.getContext("2d");
     var img = document.getElementById('gingy');
     var arr = gingy_coords;
     for (var i = 0; i < poses.length; i++){
-        const warp = new Warp(img)
+        //const warp = new Warp(img)
         for (var j = 0; j < arr.length; j++){
-            warp.transform((arr[j]) | poses[i][body_arr[j]]); // this doesn't work
-            console.log("warping " + arr[j] + " to " + poses[i][body_arr[j]]);
+            //warp.transform((arr[j]) | poses[i][body_arr[j]]); // this doesn't work
+            //console.log("warping " + arr[j] + " to " + poses[i][body_arr[j]]);
             //warp.transform(([ x, y ]) => [ x, y + 4 * Math.sin(x / 16) ])
 
         }
     }
     ctx.drawImage(img, 0, 0);
+    document.body.appendChild(canvas);
+}
+
+function warp(matrix){
+    var canvas = fx.canvas();
+    var ctx = canvas.getContext("2d");
+    var img = document.getElementById('gingy');
+    var texture = canvas.texture(img);
+    canvas.draw(texture).update();
+
+    console.log(matrix);
+    canvas.matrixWarp(matrix).update();
     document.body.appendChild(canvas);
 }
 
@@ -154,7 +184,6 @@ function addFaceDetails(canvas, poses){
             left_eye = [poses[i].keypoints[1].position.x, poses[i].keypoints[1].position.y];
             right_eye = [poses[i].keypoints[2].position.x, poses[i].keypoints[2].position.y];
             dist_btwn =  left_eye[0] - right_eye[0];
-            console.log(right_eye[0], left_eye[0], dist_btwn)
             size = dist_btwn / canvas.width * 1.5;
             if (choice == "eyeMouth"){
                 ctx.drawImage(leye, left_eye[0] - dist_btwn/2, left_eye[1] - dist_btwn/2, EYE_WIDTH * size, EYE_HEIGHT * size);
@@ -165,7 +194,7 @@ function addFaceDetails(canvas, poses){
                 ctx.drawImage(winky, right_eye[0] - (dist_btwn*1.5), right_eye[1] - (dist_btwn*1.5), FACE_DIM * size * 3, FACE_DIM * size* 3);
             }
             else if (choice == "heart"){
-                ctx.drawImage(heart, right_eye[0] - (dist_btwn*1.5), right_eye[1] - (dist_btwn*1.5), FACE_DIM * size * 3, FACE_DIM * size* 3);
+                ctx.drawImage(heart, right_eye[0] - (dist_btwn*1.5), right_eye[1] - (dist_btwn*1.5), FACE_DIM * size * 5, FACE_DIM * size* 5);
             }
             else if (choice == "ironman"){
                 ctx.drawImage(ironman, right_eye[0] - (dist_btwn*1.5), right_eye[1] - (dist_btwn*1.5), FACE_DIM * size * 3.5, FACE_DIM * size * 3.5);
@@ -245,6 +274,7 @@ function addColorMenu(){
     for (var i = 0; i < parts.length; i++){
         var input = document.createElement('input');
         input.type = "color";
+        input.class = "color_choice"
         input.value = rgbToHex(colors[parts[i][1][0]][0], colors[parts[i][1][0]][1], colors[parts[i][1][0]][2]);
         input.id = String(parts[i][1]); //something like '2,3'
         var label = document.createElement('label');
@@ -264,27 +294,52 @@ function addColorMenu(){
         menu.appendChild(document.createElement('br'));
         menu.appendChild(document.createElement('br'));
     }
+    var original_button = document.createElement('button');
+    original_button.innerHTML = "Original"
+    original_button.className = "menu_button";
+    original_button.addEventListener('click', function(){
+        rainbow = false;
+        for (var i = 0; i < color_inputs.length; i++){
+            color_inputs[i].value = rgbToHex(colors[parts[i][1][0]][0], colors[parts[i][1][0]][1], colors[parts[i][1][0]][2]);
+        }
+    });
+
     var black_button = document.createElement('button');
     black_button.innerHTML = "Black"
+    black_button.className = "menu_button";
     black_button.addEventListener('click', function(){
-        for (var i = 0; i < colors.length; i++){
-            colors[i] = [0, 0, 0, 0];
-        }
+        rainbow = false;
         for (var i = 0; i < color_inputs.length; i++){
             color_inputs[i].value = "#000000";
         }
     });
+    var button_div = document.createElement('div');
+    button_div.id = "button_div"
     var outfit1_button = document.createElement('button');
     outfit1_button.innerHTML = "Outfit 1"
+    outfit1_button.className = "menu_button";
     outfit1_button.addEventListener('click', function(){
-        colors = outfit1;
+        rainbow = false;
         for (var i = 0; i < color_inputs.length; i++){
             arr = color_inputs[i].id.split(',');
-            color_inputs[i].value = rgbToHex(colors[arr[0]][0], colors[arr[0]][1], colors[arr[0]][2]);
+            color_inputs[i].value = rgbToHex(outfit1[arr[0]][0], outfit1[arr[0]][1], outfit1[arr[0]][2]);
         }
     });
-    menu.appendChild(black_button);
-    menu.appendChild(outfit1_button);
+    var rainbow_button = document.createElement('button');
+    rainbow_button.innerHTML = "Dynamic Colored"
+    rainbow_button.className = "menu_button";
+    rainbow_button.addEventListener('click', function(){
+        rainbow = true;
+        for (var i = 0; i < color_inputs.length; i++){
+            color_inputs[i].value = rgbToHex(colors[parts[i][1][0]][0], colors[parts[i][1][0]][1], colors[parts[i][1][0]][2]);
+        }
+    });
+
+    menu.appendChild(button_div);
+    button_div.appendChild(original_button);
+    button_div.appendChild(black_button);
+    button_div.appendChild(outfit1_button);
+    button_div.appendChild(rainbow_button);
     document.getElementById('original').appendChild(menu);
 }
 
@@ -308,13 +363,16 @@ function rgbToHex(r, g, b) {
   
 function createVideo(url){
     var vid = document.createElement('video');
+    var results = document.getElementById('results')
+    var results_video = document.getElementById('results_video')
     vid.src = url;
     vid.id = "output";
-    vid.style.width = "20%";
+    vid.style.width = "50%";
     vid.addEventListener("click", function(){
         vid.play();
     })
-    document.body.appendChild(vid);
+    results.style.display = "flex";
+    results_video.appendChild(vid);
 }
 
 $(document).ready(function(){
@@ -327,8 +385,6 @@ document.addEventListener("DOMContentLoaded", function(){
     $('#uploadVideoFile').on('change',
         function() {
             var fileInput = document.getElementById("uploadVideoFile");
-            console.log('Trying to upload the video file: %O', fileInput);
-
             if ('files' in fileInput) {
                 if (fileInput.files.length === 0) {
                     alert("Select a file to upload");
@@ -339,6 +395,7 @@ document.addEventListener("DOMContentLoaded", function(){
                     $("#videoSourceWrapper").show();
                     UploadVideo(fileInput.files[0]);
                     addColorMenu();
+
                     var val = document.getElementById("dropdown1").value;
                     console.log(val)
                     if (val != "bodySeg"){
@@ -368,6 +425,13 @@ document.addEventListener("DOMContentLoaded", function(){
             else{
                 document.getElementById('menu').style.display = "none";
             }
+        }
+    });
+
+    $("#download_button").on('click', function(){
+        var output = document.getElementById('output');
+        if (output){
+            downloadURI(output.src, "video");
         }
     });
 
@@ -402,7 +466,8 @@ function UploadVideo(file) {
                 loaded = total;
                 console.log('File "' + file.name + '" uploaded successfully!');
                 $('#uploadVideoProgressBar').hide();
-                $('#process').show();     
+                $('#process').show(); 
+                document.getElementById("dropdown_div").style.display = "block";    
             }
   		}, 250);
     }
@@ -451,7 +516,6 @@ function extractFrames(){
     var ctx = canvas.getContext('2d');
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    var numFrames = 0;
 
     function drawFrame(){
         console.log("drawing frames")
@@ -507,3 +571,12 @@ function extractFrames(){
     drawFrame();
 }
 
+function downloadURI(uri, name) {
+    var link = document.createElement("a");
+    link.download = name;
+    link.href = uri;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    delete link;
+  }
