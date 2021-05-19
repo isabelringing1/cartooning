@@ -1,6 +1,7 @@
 var then = 0;
 var now = 0;
 var elapsed = 0;
+var begin = 0;
 var numFrames = 0;
 var opacity = 1;
 var times = [];
@@ -103,7 +104,7 @@ async function labelImages(array){ //make this a for loop, after all images load
         }
         var coloredPartImage = bodyPix.toColoredPartMask(segmentation, colors);
         // make backgrorund transparent
-        coloredPartImage.data = makeTransparent(coloredPartImage.data);
+        //coloredPartImage.data = makeTransparent(coloredPartImage.data);
         //add border to image
         //coloredPartImage.data = addBorder(coloredPartImage.data, coloredPartImage.width, coloredPartImage.height);
         var canvas = document.createElement('canvas');
@@ -373,6 +374,8 @@ function createVideo(url){
     })
     results.style.display = "flex";
     results_video.appendChild(vid);
+    var Elapsed = Date.now() - begin;
+    console.log("elapsed: " + Elapsed);
 }
 
 $(document).ready(function(){
@@ -409,6 +412,7 @@ document.addEventListener("DOMContentLoaded", function(){
     );
 
     $("#process").on('click', function(){
+        begin = Date.now();
         extractFrames()
     });
 
